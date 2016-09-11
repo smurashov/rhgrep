@@ -1,13 +1,12 @@
-import sys
+import rhgrep.helpers.line as myline
+import rhgrep.helpers.cache as mycache
 
-import rhgrep.helpers.SmallCache as scache
 
-
-def index_find(pattern, string, ignoreCase=False):
+def index_find(pattern, string, ignore_case=False):
     """
     Use str.find(pattern) method
     """
-    if ignoreCase:
+    if ignore_case:
         pattern, string = pattern.lower(), string.lower()
     return string.find(pattern)
 
@@ -17,38 +16,33 @@ def display_line(filename, line_number, line):
         filename=filename, num=line_number, record=line)
 
 
-def grep_file(filename, pattern, ignore_case, above_size, below_size):
-    with open(filename, 'r') as file:
-        num = 0
-        cache = []
-        above_cache = scache.SmallCache(above_size) if above_size else []
-        match_index = 0
+def as_matched(line, pattern, index):
+    return '{beforematch}\033[92m{match}\033[0m{aftermatch}\n'\
+        .format(beforematch=line[:index],
+                match=line[index:index + len(pattern)],
+                aftermatch=line[index + len(pattern):])
 
-        for line in file:
+
+def grep_without_cache(filename, pattern, ignore_case):
+    with open(filename, 'r') as file:
+        for num, line in enumerate(file):
             num += 1
             index = index_find(pattern, line, ignore_case)
             if index != -1:
-                line = '{beforematch}\033[92m{match}\033' \
-                       '[0m{aftermatch}\n'\
-                    .format(beforematch=line[:index],
-                            match=line[index:index + len(pattern)],
-                            aftermatch=line[index + len(pattern):])
+                line = as_matched(line, pattern, index)
+                print(myline.Line(line, num, filename, match=True))
 
-                if not (above_size or below_size):
-                    sys.stdout.write(display_line(filename, num, line))
-                    continue
 
-                match_index = num
-                cache.extend(filter(lambda x: x not in cache, above_cache))
+def grep_with_cache(filename, pattern, ignore_case, above_size, below_size):
 
-            if match_index == 0 and above_cache:
-                above_cache.append(display_line(filename, num, line))
-            elif match_index != 0 and num <= match_index + below_size:
-                cache.append(display_line(filename, num, line))
-            elif above_cache:
-                above_cache.set_cache(cache[-above_size:])
-                above_cache.append(display_line(filename, num, line))
-                match_index = 0
+    with mycache.Cache(above_size, below_size) as cache:
+        with open(filename, 'r') as file:
+            for num, line in enumerate(file):
+                num += 1
+                index = index_find(pattern, line, ignore_case)
+                match = False if index == -1 else True
 
-    for val in cache:
-        sys.stdout.write(val)
+                line = myline.Line(
+                    as_matched(line, pattern, index), num, filename, match=match
+                )
+                cache.add(line)

@@ -29,9 +29,12 @@ def main():
     pattern = args.pattern
     files = [f if f != '-' else 'stdin' for f in args.files]
 
-    utils.grep_file(
-        args.files[0], pattern, args.ignore_case, args.above, args.below
-    )
+    if args.above or args.below:
+        utils.grep_with_cache(
+            args.files[0], pattern, args.ignore_case, args.above, args.below
+        )
+    else:
+        utils.grep_without_cache(args.files[0], pattern, args.ignore_case)
 
 if __name__ == '__main__':
     main()

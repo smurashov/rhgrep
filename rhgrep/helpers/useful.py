@@ -1,6 +1,6 @@
-def non_zero(cls):
-    def inner(size):
-        if size <= 0:
-            raise ValueError("Size can not be {}".format(size))
-        return cls(size)
+def ge_zero(cls):
+    def inner(*args):
+        if any((i < 0 for i in args)):
+            raise ValueError("{} requires values >= 0".format(cls))
+        return cls(*args)
     return inner
