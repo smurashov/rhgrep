@@ -10,8 +10,14 @@ def setup_parser():
     parser.add_argument('--help', action='help',
                         help='show this help message and exit')
     parser.add_argument('pattern', type=str, help='the pattern to find')
-    parser.add_argument('files', metavar='FILES', nargs='*', default=['-'],
-                        help='the files(s) to search')
+    parser.add_argument('file', type=str,
+                        help='the wildcard to search')
+    parser.add_argument('-H', '--host', default='localhost',
+                        help='address of remote host')
+    parser.add_argument('-U', '--user', default='user',
+                        help='username for authentication')
+    parser.add_argument('-P', '--password', default='swordfish',
+                        help='password for authentication')
     parser.add_argument('-i', '--ignore-case', action='store_true',
                         help='case-insensitive search')
     parser.add_argument('-R', '-r', '--recursive', action='store_true',
@@ -26,15 +32,16 @@ def setup_parser():
 def main():
     parser = setup_parser()
     args = parser.parse_args()
-    pattern = args.pattern
-    files = [f if f != '-' else 'stdin' for f in args.files]
 
-    if args.above or args.below:
-        utils.grep_with_cache(
-            args.files[0], pattern, args.ignore_case, args.above, args.below
-        )
-    else:
-        utils.grep_without_cache(args.files[0], pattern, args.ignore_case)
+    utils.ssh_grep(args.file,
+                   args.pattern,
+                   host=args.host,
+                   user=args.user,
+                   password=args.password,
+                   recursive=args.recursive,
+                   ignore_case=args.ignore_case,
+                   above=args.above,
+                   below=args.below)
 
 if __name__ == '__main__':
     main()

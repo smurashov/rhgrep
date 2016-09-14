@@ -6,8 +6,8 @@ class Line:
         self.match = match
 
     def __repr__(self):
-        return '{filename}:{num}:{record}\n'.format(
-            filename=self.filename, num=self.num, record=self.string
+        return '{filename}:{num}:{record}'.format(
+            filename=self.filename, num=self.num, record=self.string.rstrip()
         )
 
     def __str__(self):
