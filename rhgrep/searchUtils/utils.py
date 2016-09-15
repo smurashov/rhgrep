@@ -6,6 +6,48 @@ import rhgrep.helpers.line as myline
 import rhgrep.helpers.cache as mycache
 
 
+def horspul_implementation(pattern, string, ignore_case=False):
+    """
+    Horspool algorithm is the modification of Boyer-Moore algorithm
+    it works faster then Boyer-Moore on random texts
+    but slower in worst case
+    """
+    patlen = len(pattern)
+    strlen = len(string)
+
+    if strlen < patlen:
+        return -1
+
+    if ignore_case:
+        pattern, string = pattern.lower(), string.lower()
+
+    a = []
+
+    for i in range(256):
+        a.append(patlen)
+
+    for i in range(patlen - 1):
+        a[ord(pattern[i])] = patlen - 1 - i
+
+    a = tuple(a)
+    k = patlen - 1
+
+    while k < strlen:
+        j = patlen - 1
+        i = k
+
+        while j >= 0 and string[i] == pattern[j]:
+            j -= 1
+            i -= 1
+
+        if j == -1:
+            return i + 1
+
+        k += a[ord(string[k])]
+
+    return -1
+
+
 def index_find(pattern, string, ignore_case=False):
     """
     Use str.find(pattern) method
@@ -25,7 +67,7 @@ def as_matched(line, pattern, index):
 def grep_without_cache(file, pattern, ignore_case):
     for num, line in enumerate(file):
         num += 1
-        index = index_find(pattern, line, ignore_case)
+        index = horspul_implementation(pattern, line, ignore_case)
 
         if index != -1:
             line = as_matched(line, pattern, index)
@@ -38,7 +80,7 @@ def grep_with_cache(file, pattern, ignore_case, above_size, below_size):
         for num, line in enumerate(file):
             match = False
             num += 1
-            index = index_find(pattern, line, ignore_case)
+            index = horspul_implementation(pattern, line, ignore_case)
 
             if index != -1:
                 match = True
