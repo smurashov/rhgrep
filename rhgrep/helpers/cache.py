@@ -20,7 +20,7 @@ class Cache:
     Cache ensure that we keep only necessary lines without duplicates
     For example in case when we have 100 matches of pattern, and we have to
     print also 500 lines above and 500 lines below it's difficulty to
-    preserve all 50000 lines in the same time this lines can duplicate
+    preserve all 100100 lines in the same time this lines can duplicate
     each other and we ensure that we will print only unique lines
     """
     def __init__(self, above, below):
