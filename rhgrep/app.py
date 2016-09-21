@@ -1,6 +1,6 @@
 from argparse import ArgumentParser
 
-from rhgrep.searchUtils import utils
+from rhgrep.remote_grep import ssh_grep
 
 
 def setup_parser():
@@ -33,15 +33,15 @@ def main():
     parser = setup_parser()
     args = parser.parse_args()
 
-    utils.ssh_grep(args.file,
-                   args.pattern,
-                   host=args.host,
-                   user=args.user,
-                   password=args.password,
-                   recursive=args.recursive,
-                   ignore_case=args.ignore_case,
-                   above=args.above,
-                   below=args.below)
+    ssh_grep(args.file,
+             args.pattern,
+             host=args.host,
+             user=args.user,
+             password=args.password,
+             recursive=args.recursive,
+             ignore_case=args.ignore_case,
+             above=args.above,
+             below=args.below)
 
 if __name__ == '__main__':
     main()
